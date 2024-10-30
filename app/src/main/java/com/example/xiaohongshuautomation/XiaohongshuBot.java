@@ -15,17 +15,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
 
 public class XiaohongshuBot {
 
     private UiDevice device;
-    private List<String> xhsIds;
+    private Map<String, String> xhsIds;
     private String messageText = "你好老板";
 
     public XiaohongshuBot(UiDevice device, Context context) {
         this.device = device;
         DataReader dbReader = new DataReader(context);
-        this.xhsIds = dbReader.fetchXhsIds();
+        this.xhsIds = dbReader.fetchXhsIdUserIdMap();
         this.messageText = loadMessageFromFile(context);
     }
 
@@ -48,17 +49,17 @@ public class XiaohongshuBot {
 
     public void runBot() {
         System.out.println("XiaohongshuBot: " + "Bot launched");
-        for (String xhsId : xhsIds) {
+        for (Map.Entry<String, String> entry : xhsIds.entrySet()) {
             try {
-                System.out.println("XiaohongshuBot: " + "Now contacting " + xhsId);
-                searchAndSendMessage(xhsId);
+                System.out.println("XiaohongshuBot: " + "Now contacting " + entry.getKey());
+                searchAndSendMessage(entry.getKey(), entry.getValue());
             } catch (UiObjectNotFoundException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void searchAndSendMessage(String xhsId) throws UiObjectNotFoundException {
+    private void searchAndSendMessage(String xhsId, String userId) throws UiObjectNotFoundException {
         // Open the search field in Xiaohongshu
         UiObject searchIcon = device.findObject(new UiSelector().packageName("com.xingin.xhs")
                 .description("Search")
@@ -79,7 +80,7 @@ public class XiaohongshuBot {
         userResult.click();
         UiObject userNameField = device.findObject(new UiSelector().packageName("com.xingin.xhs")
                 .className("android.widget.TextView")
-                .index(0));
+                .text(userId));
         userNameField.click();
 
         // Find the message button
