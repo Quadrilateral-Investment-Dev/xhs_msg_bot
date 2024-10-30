@@ -78,10 +78,33 @@ public class XiaohongshuBot {
                 .className("android.widget.TextView")
                 .text("Users"));
         userResult.click();
-        UiObject userNameField = device.findObject(new UiSelector().packageName("com.xingin.xhs")
+        UiObject userNameField = device.findObject(new UiSelector()
+                .packageName("com.xingin.xhs")
                 .className("android.widget.TextView")
                 .text(userId));
-        userNameField.click();
+
+        try {
+            // First attempt to click with exact text match
+            if (userNameField.exists()) {
+                userNameField.click();
+                System.out.println("User text view clicked with exact match.");
+            } else {
+                // If exact match fails, try with starts-with match
+                userNameField = device.findObject(new UiSelector()
+                        .packageName("com.xingin.xhs")
+                        .className("android.widget.TextView")
+                        .textContains(userId));
+
+                if (userNameField.exists()) {
+                    userNameField.click();
+                    System.out.println("User text view clicked with starts-with match.");
+                } else {
+                    System.out.println("User text view not found with either exact or starts-with match.");
+                }
+            }
+        } catch (UiObjectNotFoundException e) {
+            e.printStackTrace();
+        }
 
         // Find the message button
         UiObject button = device.findObject(new UiSelector()
