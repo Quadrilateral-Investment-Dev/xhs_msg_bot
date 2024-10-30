@@ -59,6 +59,11 @@ public class XiaohongshuBot {
         }
     }
 
+    public String removeEmojis(String input) {
+        return input.replaceAll("[\\uD83C-\\uDBFF\\uDC00-\\uDFFF]+", "");
+    }
+
+
     private void searchAndSendMessage(String xhsId, String userId) throws UiObjectNotFoundException {
         // Open the search field in Xiaohongshu
         UiObject searchIcon = device.findObject(new UiSelector().packageName("com.xingin.xhs")
@@ -93,7 +98,7 @@ public class XiaohongshuBot {
                 userNameField = device.findObject(new UiSelector()
                         .packageName("com.xingin.xhs")
                         .className("android.widget.TextView")
-                        .textContains(userId));
+                        .textContains(this.removeEmojis(userId)));
 
                 if (userNameField.exists()) {
                     userNameField.click();
