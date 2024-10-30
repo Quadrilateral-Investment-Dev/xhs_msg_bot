@@ -86,7 +86,7 @@ public class XiaohongshuBot {
         UiObject userNameField = device.findObject(new UiSelector()
                 .packageName("com.xingin.xhs")
                 .className("android.widget.TextView")
-                .text(userId));
+                .text("RED ID: " + xhsId));
 
         try {
             // First attempt to click with exact text match
@@ -104,7 +104,36 @@ public class XiaohongshuBot {
                     userNameField.click();
                     System.out.println("User text view clicked with starts-with match.");
                 } else {
-                    System.out.println("User text view not found with either exact or starts-with match.");
+                    // Attempt 3: Loop through candidates using instance(i)
+                    boolean found = false;
+                    int i = 0;
+                    while (true) {
+                        UiObject candidate = device.findObject(new UiSelector()
+                                .packageName("com.xingin.xhs")
+                                .className("android.widget.TextView")
+                                .instance(i));
+
+                        if (!candidate.exists()) {
+                            break; // Exit loop if no more matching instances
+                        }
+
+                        // Get the element text and clean it of emojis
+                        String elementText = candidate.getText();
+                        String cleanedElementText = this.removeEmojis(elementText);
+
+                        // Compare cleaned texts
+                        if (this.removeEmojis(userId).equals(cleanedElementText)) {
+                            candidate.click();
+                            System.out.println("User text view clicked with fallback cleaned match.");
+                            found = true;
+                            break; // Exit once we find and click the matching element
+                        }
+                        i++;
+                    }
+
+                    if (!found) {
+                        System.out.println("User text view not found with exact, starts-with, or cleaned match.");
+                    }
                 }
             }
         } catch (UiObjectNotFoundException e) {
